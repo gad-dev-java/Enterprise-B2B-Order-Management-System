@@ -1,0 +1,51 @@
+services:
+  postgres-b2b:
+    image: postgres:17-alpine
+    container_name: b2b-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gad-dev
+      POSTGRES_PASSWORD: 123456789
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgres/init-scripts:/docker-entrypoint-initdb.d
+      - postgres_data_b2b:/var/lib/postgresql/data
+    networks:
+      - b2b-network
+
+  mongodb-b2b:
+    image: mongo:8.0
+    container_name: b2b-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: gad-dev
+      MONGO_INITDB_ROOT_PASSWORD: 123456789
+      MONGO_INITDB_DATABASE: batch_service_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data_b2b:/data/db
+      - ./infra/mongodb/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - b2b-network
+
+  keycloak-b2b:
+    image: quay.io/keycloak/keycloak:26.4.7
+    container_name: b2b-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    networks:
+      - b2b-network
+
+networks:
+  b2b-network:
+    driver: bridge
+
+volumes:
+  postgres_data_b2b:
+  mongo_data_b2b:
