@@ -1,9 +1,9 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/customer_service_db
+    driver-class-name: org.postgresql.Driver
     username: gad-dev
     password: 123456789
-    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
@@ -27,3 +27,14 @@ server:
   port: 8083
   servlet:
     context-path: /api/v1
+
+app:
+  keycloak:
+    server-url: http://localhost:8180
+    realm: b2b-services]
+    client-secret: kaUcD8uYAAvvMyBXhddyId2L0YgJ59Ao
+    client-id: b2b-services-api
+    connection-pool-size: 5
+    connect-timeout: 10
+    read-timeout: 30
+    verify-connection: true

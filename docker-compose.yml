@@ -40,7 +40,7 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://b2b-postgres:5432/keycloak_db
       KC_DB_USERNAME: gad-dev
-      KC_DB_PASSWORD: 123456789]
+      KC_DB_PASSWORD: 123456789
       KC_HOSTNAME: localhost
     depends_on:
         - postgres-b2b
@@ -48,6 +48,46 @@ services:
       - "8180:8080"
     networks:
       - b2b-network
+
+  vault-b2b:
+    image: hashicorp/vault:1.19.0
+    container_name: b2b-vault
+    restart: unless-stopped
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: ROOT-TOKEN-DEV
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+      VAULT_ADDR: http://0.0.0.0:8200
+    cap_add:
+      - IPC_LOCK
+    command: server -dev
+    networks:
+      - b2b-network
+
+  vault-init:
+    image: hashicorp/vault:1.19.0
+    container_name: b2b-vault-init
+    depends_on:
+      - vault-b2b
+    environment:
+      VAULT_ADDR: "http://b2b-vault:8200"
+      VAULT_TOKEN: "ROOT-TOKEN-DEV"
+    volumes:
+      - ./infra/secrets:/tmp/secrets
+    networks:
+      - b2b-network
+    command: >
+      sh -c "
+        echo '⏳ Esperando a que Vault arranque...';
+        sleep 5;
+        echo '🔓 Habilitando motor de secretos...';
+        vault secrets enable -path=secret kv-v2 || true;
+        echo '📥 Cargando secretos...';
+        vault kv put secret/common @/tmp/secrets/common-secrets.json;
+        vault kv put secret/customer-service @/tmp/secrets/customer-service.json;
+        echo '✅ ¡Configuración completada!';
+      "
 
 networks:
   b2b-network:
