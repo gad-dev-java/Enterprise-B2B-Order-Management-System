@@ -1,12 +1,25 @@
 spring:
-  profiles:
-    active: native
   application:
     name: config-server
+  profiles:
+    active: composite
+  main:
+    allow-bean-definition-overriding: true
   cloud:
     config:
       server:
-        native:
-          search-locations: classpath:/configurations
+        composite:
+          - type: vault
+            order: 1
+            host: localhost
+            port: 8200
+            scheme: http
+            backend: secret
+            kv-version: 2
+            authentication: token
+            token: ${VAULT_TOKEN:ROOT-TOKEN-DEV}
+          - type: native
+            order: 2
+            search-locations: classpath:/configurations
 server:
   port: 8888

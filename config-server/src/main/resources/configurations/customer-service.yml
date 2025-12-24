@@ -31,7 +31,7 @@ server:
 app:
   keycloak:
     server-url: http://localhost:8180
-    realm: b2b-services]
+    realm: b2b-services
     client-secret: kaUcD8uYAAvvMyBXhddyId2L0YgJ59Ao
     client-id: b2b-services-api
     connection-pool-size: 5
